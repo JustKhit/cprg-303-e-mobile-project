@@ -8,11 +8,12 @@ import {
   TextInput,
   Alert,
   Button,
+  TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import firestore from '@react-native-firebase/firestore';
 
-const ParkingLotListScreen = () => {
+const ParkingLotListScreen = ({navigation}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [spots, setSpots] = useState([]);
 
@@ -30,7 +31,6 @@ const ParkingLotListScreen = () => {
               ...data,
             });
           });
-          console.log(list[0])
           setSpots(list);
         })
         .catch(error => {
@@ -44,12 +44,8 @@ const ParkingLotListScreen = () => {
     setSearchQuery(query);
   };
 
-  const handleReserve = () => {
-
-  }
-
   const filteredSpots = spots.filter(spot =>
-    spot.name.toLowerCase().includes(searchQuery.toLowerCase())
+    spot.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const renderItem = ({item}) => (
@@ -60,7 +56,8 @@ const ParkingLotListScreen = () => {
       <Button
         style={styles.button}
         title="Reserve Yours"
-        onPress={handleReserve}
+        disabled={item.availability == 0}
+        onPress={() => navigation.navigate('ParkingLotDetail', {item})}
       />
     </View>
   );
@@ -74,7 +71,10 @@ const ParkingLotListScreen = () => {
           value={searchQuery}
           onChangeText={handleSearch}
         />
-        <Icon name="map" size={20} color="#000" />
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Map', {spots})}>
+          <Icon name="map" size={20} color="#000" />
+        </TouchableOpacity>
       </View>
       <FlatList
         data={filteredSpots}
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   },
   itemHeaderText: {
     fontSize: 18,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   itemText: {
     fontSize: 16,

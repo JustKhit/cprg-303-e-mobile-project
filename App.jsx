@@ -15,6 +15,10 @@ import auth from '@react-native-firebase/auth';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import ParkingLotListScreen from './screens/ParkingLotListScreen';
+import ParkingLotDetailScreen from './screens/ParkingLotDetailScreen';
+import ReservationListScreen from './screens/ReservationListScreen';
+import UserScreen from './screens/UserScreen';
+import MapScreen from './screens/MapScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -48,10 +52,26 @@ const MainStack = () => {
         },
         tabBarIconStyle: {display: 'none'},
       }}>
-      <Tab.Screen name="Spots" component={ParkingLotListScreen} />
-      <Tab.Screen name="Reservations" component={ParkingLotListScreen} />
-      <Tab.Screen name="User" component={ParkingLotListScreen} />
+      <Tab.Screen name="Parking Lots" component={ParkingLotStack} />
+      <Tab.Screen name="Reservations" component={ReservationListScreen} />
+      <Tab.Screen name="User" component={UserScreen} />
     </Tab.Navigator>
+  );
+};
+
+const ParkingLotStack = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}>
+      <Stack.Screen name="ParkingLotList" component={ParkingLotListScreen} />
+      <Stack.Screen
+        name="ParkingLotDetail"
+        component={ParkingLotDetailScreen}
+      />
+      <Stack.Screen name="Map" component={MapScreen} />
+    </Stack.Navigator>
   );
 };
 
