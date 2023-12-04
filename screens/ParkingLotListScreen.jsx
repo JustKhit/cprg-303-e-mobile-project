@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   SafeAreaView,
   View,
@@ -6,26 +6,64 @@ import {
   FlatList,
   StyleSheet,
   TextInput,
+  Alert,
+  Button,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import firestore from '@react-native-firebase/firestore';
 
 const ParkingLotListScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [spots, setSpots] = useState([
-    {id: '1', name: 'Parking Lot A'},
-    {id: '2', name: 'Parking Lot B'},
-    {id: '3', name: 'Parking Lot C'},
-  ]);
+  const [spots, setSpots] = useState([]);
 
-  const renderItem = ({item}) => (
-    <View style={styles.itemContainer}>
-      <Text style={styles.itemText}>{item.name}</Text>
-    </View>
-  );
+  useEffect(() => {
+    const fetchSpots = () => {
+      firestore()
+        .collection('spots')
+        .get()
+        .then(collectionSnapshot => {
+          const list = [];
+          collectionSnapshot.forEach(documentSnapshot => {
+            const data = documentSnapshot.data();
+            list.push({
+              id: documentSnapshot.id,
+              ...data,
+            });
+          });
+          console.log(list[0])
+          setSpots(list);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    };
+    fetchSpots();
+  }, []);
 
   const handleSearch = query => {
     setSearchQuery(query);
   };
+
+  const handleReserve = () => {
+
+  }
+
+  const filteredSpots = spots.filter(spot =>
+    spot.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const renderItem = ({item}) => (
+    <View style={styles.itemContainer}>
+      <Text style={styles.itemText}>{item.name}</Text>
+      <Text style={styles.itemText}>Available: {item.availability}</Text>
+      <Text style={styles.itemText}>Slots: {item.capacity}</Text>
+      <Button
+        style={styles.button}
+        title="Reserve Yours"
+        onPress={handleReserve}
+      />
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -39,7 +77,7 @@ const ParkingLotListScreen = () => {
         <Icon name="map" size={20} color="#000" />
       </View>
       <FlatList
-        data={spots}
+        data={filteredSpots}
         renderItem={renderItem}
         keyExtractor={item => item.id}
       />
@@ -70,8 +108,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#cccccc',
   },
-  itemText: {
+  itemHeaderText: {
     fontSize: 18,
+    fontWeight: 'bold'
+  },
+  itemText: {
+    fontSize: 16,
   },
 });
 
